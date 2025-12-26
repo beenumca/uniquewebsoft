@@ -1,0 +1,11 @@
+# Files
+logs.php
+credentials.php
+
+# Applications
+*.app
+*.log
+
+# Folder
+Paytm
+Razorpay
