@@ -32,6 +32,9 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            # Fix for Git ownership warning
+            git config --global --add safe.directory /var/www/html/uniquewebsoft
+
             cd /var/www/html/uniquewebsoft
             git pull origin master
             sudo chown -R www-data:www-data .
