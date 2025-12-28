@@ -1,24 +1,38 @@
-name: Deploy to EC2
+name: PHP Deploy to AWS EC2
 
 on:
   push:
     branches:
-      - master
+      - master   # main branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
 
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@v0.1.6
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          port: 22
-          script: |
-            cd /var/www/html/uniquewebsoft
+    steps:
+      # Step 1: Code checkout
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Setup SSH
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+      # Step 3: Deploy to EC2
+      - name: Deploy PHP Project
+        run: |
+          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            cd /var/www/uniquewebsoft
             git pull origin master
+
+            # permissions
+            sudo chown -R www-data:www-data /var/www/uniquewebsoft
+            sudo chmod -R 755 /var/www/php-project
+
+            # Apache restart
+            sudo systemctl restart apache2
+          EOF
