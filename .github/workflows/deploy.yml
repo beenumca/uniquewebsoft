@@ -23,7 +23,7 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
-      # Step 3: Test SSH connection (optional, for debugging)
+      # Step 3: Test SSH connection (optional)
       - name: Test SSH Connection
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "echo SSH Connected"
@@ -32,12 +32,16 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-            # Fix for Git ownership warning
+            # Mark the repo safe for Git
             git config --global --add safe.directory /var/www/html/uniquewebsoft
 
-            cd /var/www/html/uniquewebsoft
-            git pull origin master
-            sudo chown -R www-data:www-data .
-            sudo chmod -R 755 .
+            # Pull latest code as www-data (matches folder permissions)
+            sudo -u www-data git -C /var/www/html/uniquewebsoft pull origin master
+
+            # Ensure permissions
+            sudo chown -R www-data:www-data /var/www/html/uniquewebsoft
+            sudo chmod -R 755 /var/www/html/uniquewebsoft
+
+            # Restart Apache
             sudo systemctl restart apache2
           EOF
