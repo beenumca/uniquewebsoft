@@ -35,8 +35,9 @@ jobs:
             # Mark the repo safe for Git
             git config --global --add safe.directory /var/www/html/uniquewebsoft
 
-            # Pull latest code as www-data (matches folder permissions)
-            sudo -u www-data git -C /var/www/html/uniquewebsoft pull origin master
+            # Force pull latest code as www-data (overwrite any local changes)
+            sudo -u www-data git -C /var/www/html/uniquewebsoft fetch --all
+            sudo -u www-data git -C /var/www/html/uniquewebsoft reset --hard origin/master
 
             # Ensure permissions
             sudo chown -R www-data:www-data /var/www/html/uniquewebsoft
