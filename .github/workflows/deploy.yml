@@ -31,7 +31,7 @@ jobs:
 
             # permissions
             sudo chown -R www-data:www-data /var/www/uniquewebsoft
-            sudo chmod -R 755 /var/www/php-project
+            sudo chmod -R 755 /var/www/uniquewebsoft
 
             # Apache restart
             sudo systemctl restart apache2
